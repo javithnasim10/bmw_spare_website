@@ -1,10 +1,48 @@
 "use client"
 
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
+import { useState } from "react"
 
 export function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus(null)
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) throw new Error("Failed to submit")
+
+      setSubmitStatus("success")
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
+    } catch (error) {
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <section id="contact" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -18,7 +56,7 @@ export function Contact() {
           <Card>
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-6">Send us a message</h3>
-              <form className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-2">
                     Name
@@ -26,8 +64,11 @@ export function Contact() {
                   <input
                     type="text"
                     id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background"
                     placeholder="Your name"
+                    required
                   />
                 </div>
                 <div>
@@ -37,8 +78,37 @@ export function Contact() {
                   <input
                     type="email"
                     id="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background"
                     placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                    Phone (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background"
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium mb-2">
+                    Subject (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background"
+                    placeholder="What is this regarding?"
                   />
                 </div>
                 <div>
@@ -48,12 +118,21 @@ export function Contact() {
                   <textarea
                     id="message"
                     rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background resize-none"
                     placeholder="Tell us what you need..."
+                    required
                   />
                 </div>
-                <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                  Send Message
+                {submitStatus === "success" && (
+                  <p className="text-green-600 text-sm">Message sent successfully! We'll get back to you soon.</p>
+                )}
+                {submitStatus === "error" && (
+                  <p className="text-red-600 text-sm">Failed to send message. Please try again.</p>
+                )}
+                <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>

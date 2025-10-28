@@ -2,6 +2,7 @@ import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { Features } from "@/components/features"
 import { Categories } from "@/components/categories"
+import { PartsShowcase } from "@/components/parts-showcase"
 import { About } from "@/components/about"
 import { Contact } from "@/components/contact"
 import { Footer } from "@/components/footer"
@@ -13,6 +14,7 @@ export default function Home() {
       <Hero />
       <Features />
       <Categories />
+      <PartsShowcase />
       <About />
       <Contact />
       <Footer />
